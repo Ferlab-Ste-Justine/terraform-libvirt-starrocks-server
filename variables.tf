@@ -219,33 +219,45 @@ variable "starrocks" {
   type        = object({
     release_version = string
     node_type       = string
-    is_fe_leader    = bool
-    fe_leader_node  = object({
-      ip   = string
-      fqdn = string
+    fe_config       = optional(object({
+      is_leader_at_start = bool
+      ssl                = optional(object({
+        enabled           = bool
+        keystore_base64   = string
+        keystore_password = string
+        key_password      = string
+      }), {
+        enabled           = false
+        keystore_base64   = ""
+        keystore_password = ""
+        key_password      = ""
+      })
+      root_password = string
+    }), {
+      is_leader_at_start = false
+      ssl                = {
+        enabled           = false
+        keystore_base64   = ""
+        keystore_password = ""
+        key_password      = ""
+      }
+      root_password = ""
     })
-    fe_follower_nodes = list(object({
-      ip   = string
-      fqdn = string
-    }))
-    be_nodes = list(object({
-      ip   = string
-      fqdn = string
-    }))
-    root_password = string
+    network_info = object({
+      fe_leader_node = object({
+        ip   = string
+        fqdn = string
+      })
+      fe_follower_nodes = list(object({
+        ip   = string
+        fqdn = string
+      }))
+      be_nodes = list(object({
+        ip   = string
+        fqdn = string
+      }))
+    })
   })
-  default = {
-    release_version   = ""
-    node_type         = ""
-    is_fe_leader      = false
-    fe_leader_node    = {
-      ip   = ""
-      fqdn = ""
-    }
-    fe_follower_nodes = []
-    be_nodes          = []
-    root_password     = ""
-  }
 
   validation {
     condition     = contains(["fe", "be"], var.starrocks.node_type)

@@ -68,8 +68,5 @@ The module takes the following variables as input:
 - **starrocks**: StarRocks configuration. It has the following keys:
   - **release_version**: StarRocks release version to install.
   - **node_type**: StarRocks node type to configure, either **fe** or **be**.
-  - **is_fe_leader**: Whether StarRocks node is the fe leader.
-  - **fe_leader_node**: StarRocks **ip** and **fqdn** of the fe leader node.
-  - **fe_follower_nodes**: StarRocks **ip** and **fqdn** of each follower node.
-  - **be_nodes**: StarRocks **ip** and **fqdn** of each be node.
-  - **root_password**: StarRocks root password.
+  - **fe_config**: StarRocks FE-related settings (**is_leader_at_start** + **ssl** + **root_password**). Only needed if **node_type** is set to **fe**.
+  - **network_info**: StarRocks **ip** and **fqdn** values of all nodes.
