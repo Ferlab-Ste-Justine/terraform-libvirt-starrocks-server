@@ -20,10 +20,11 @@ locals {
       hostname = null
     }]
   )
+  hostname = var.hostname.hostname != "" ? var.hostname.hostname : var.name
 }
 
 module "network_configs" {
-  source             = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//network?ref=v0.25.0"
+  source             = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//network?ref=v0.34.0"
   network_interfaces = concat(
     [for idx, libvirt_network in var.libvirt_networks: {
       ip = libvirt_network.ip
@@ -45,25 +46,21 @@ module "network_configs" {
 }
 
 module "starrocks_configs" {
-  source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//starrocks?ref=v0.25.0"
+  source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//starrocks?ref=v0.34.0"
   install_dependencies = var.install_dependencies
   timezone             = var.timezone
   release_version      = var.starrocks.release_version
   node_type            = var.starrocks.node_type
-  is_fe_leader         = var.starrocks.is_fe_leader
-  fe_leader_node       = var.starrocks.fe_leader_node
-  fe_follower_nodes    = var.starrocks.fe_follower_nodes
-  be_nodes             = var.starrocks.be_nodes
-  root_password        = var.starrocks.root_password
+  fe_config            = var.starrocks.fe_config
 }
 
 module "prometheus_node_exporter_configs" {
-  source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//prometheus-node-exporter?ref=v0.25.0"
+  source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//prometheus-node-exporter?ref=v0.34.0"
   install_dependencies = var.install_dependencies
 }
 
 module "chrony_configs" {
-  source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//chrony?ref=v0.25.0"
+  source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//chrony?ref=v0.34.0"
   install_dependencies = var.install_dependencies
   chrony               = {
     servers  = var.chrony.servers
@@ -73,7 +70,7 @@ module "chrony_configs" {
 }
 
 module "fluentbit_updater_etcd_configs" {
-  source = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//configurations-auto-updater?ref=v0.25.0"
+  source = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//configurations-auto-updater?ref=v0.34.0"
   install_dependencies = var.install_dependencies
   filesystem = {
     path = "/etc/fluent-bit-customization/dynamic-config"
@@ -107,7 +104,7 @@ module "fluentbit_updater_etcd_configs" {
 }
 
 module "fluentbit_updater_git_configs" {
-  source = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//gitsync?ref=v0.25.0"
+  source = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//gitsync?ref=v0.34.0"
   install_dependencies = var.install_dependencies
   filesystem = {
     path = "/etc/fluent-bit-customization/dynamic-config"
@@ -127,7 +124,7 @@ module "fluentbit_updater_git_configs" {
 }
 
 module "fluentbit_configs" {
-  source = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//fluent-bit?ref=v0.25.0"
+  source = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//fluent-bit?ref=v0.34.0"
   install_dependencies = var.install_dependencies
   fluentbit = {
     metrics = var.fluentbit.metrics
@@ -157,7 +154,8 @@ locals {
         content      = templatefile(
           "${path.module}/files/user_data.yaml.tpl", 
           {
-            hostname             = var.name
+            hostname             = local.hostname
+            is_fqdn              = var.hostname.is_fqdn
             ssh_admin_public_key = var.ssh_admin_public_key
             ssh_admin_user       = var.ssh_admin_user
             admin_user_password  = var.admin_user_password
