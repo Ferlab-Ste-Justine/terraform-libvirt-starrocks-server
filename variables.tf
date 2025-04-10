@@ -256,31 +256,22 @@ variable "starrocks" {
     node_type       = string
     fe_config       = optional(object({
       initial_leader = optional(object({
-        enabled       = bool
-        root_password = string
-        fe_follower_nodes = list(object({
-          ip   = string
-          fqdn = string
-        }))
-        be_nodes = list(object({
-          ip   = string
-          fqdn = string
-        }))
+        enabled           = bool
+        root_password     = string
+        fe_follower_fqdns = list(string)
+        be_fqdns          = list(string)
       }), {
         enabled           = false
         root_password     = ""
-        fe_follower_nodes = []
-        be_nodes          = []
+        fe_follower_fqdns = []
+        be_fqdns          = []
       })
       initial_follower = optional(object({
         enabled        = bool
-        fe_leader_node = object({
-          ip   = string
-          fqdn = string
-        })
+        fe_leader_fqdn = string
       }), {
         enabled        = false
-        fe_leader_node = null
+        fe_leader_fqdn = ""
       })
       ssl = optional(object({
         enabled           = bool
