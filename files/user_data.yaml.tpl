@@ -7,6 +7,10 @@ chpasswd:
 %{ endif ~}
 preserve_hostname: false
 hostname: ${hostname}
+%{ if is_fqdn != "" ~}
+fqdn: ${hostname}
+prefer_fqdn_over_hostname: true
+%{ endif ~}
 users:
   - default
   - name: ${ssh_admin_user}

@@ -3,6 +3,18 @@ variable "name" {
   type        = string
 }
 
+variable "hostname" {
+  description = "Value to assign to the hostname. If left to empty (default), 'name' variable will be used."
+  type        = object({
+    hostname = string
+    is_fqdn  = string
+  })
+  default = {
+    hostname = ""
+    is_fqdn  = false
+  }
+}
+
 variable "vcpus" {
   description = "Number of vcpus to assign to the vm"
   type        = number
@@ -21,15 +33,15 @@ variable "volume_id" {
 }
 
 variable "libvirt_networks" {
-  description = "Parameters of libvirt network connections if a libvirt networks are used"
+  description = "Parameters of libvirt network connections if libvirt networks are used"
   type = list(object({
-    network_name = string
-    network_id = string
+    network_name = optional(string, "")
+    network_id = optional(string, "")
     prefix_length = string
     ip = string
     mac = string
-    gateway = string
-    dns_servers = list(string)
+    gateway = optional(string, "")
+    dns_servers = optional(list(string), [])
   }))
   default = []
 }
@@ -41,8 +53,8 @@ variable "macvtap_interfaces" {
     prefix_length = string
     ip            = string
     mac           = string
-    gateway       = string
-    dns_servers   = list(string)
+    gateway       = optional(string, "")
+    dns_servers   = optional(list(string), [])
   }))
   default = []
 }
@@ -109,13 +121,17 @@ variable "chrony" {
 
 variable "fluentbit" {
   description = "Fluent-bit configuration"
+  sensitive = true
   type = object({
     enabled = bool
     starrocks_tag = string
     node_exporter_tag = string
-    metrics = object({
+    metrics = optional(object({
       enabled = bool
       port    = number
+    }), {
+      enabled = false
+      port = 0
     })
     forward = object({
       domain = string
@@ -148,7 +164,7 @@ variable "fluentbit_dynamic_config" {
   type = object({
     enabled = bool
     source  = string
-    etcd    = object({
+    etcd    = optional(object({
       key_prefix     = string
       endpoints      = list(string)
       ca_certificate = string
@@ -158,8 +174,18 @@ variable "fluentbit_dynamic_config" {
         username    = string
         password    = string
       })
+    }), {
+      key_prefix     = ""
+      endpoints      = []
+      ca_certificate = ""
+      client         = {
+        certificate = ""
+        key         = ""
+        username    = ""
+        password    = ""
+      }
     })
-    git     = object({
+    git     = optional(object({
       repo             = string
       ref              = string
       path             = string
@@ -168,6 +194,15 @@ variable "fluentbit_dynamic_config" {
         client_ssh_key         = string
         server_ssh_fingerprint = string
       })
+    }), {
+      repo             = ""
+      ref              = ""
+      path             = ""
+      trusted_gpg_keys = []
+      auth             = {
+        client_ssh_key         = ""
+        server_ssh_fingerprint = ""
+      }
     })
   })
   default = {
@@ -217,50 +252,73 @@ variable "timezone" {
 variable "starrocks" {
   description = "Configuration for the starrocks server"
   type        = object({
-    release_version = string
+    release_version = optional(string, "3.4.1"),
     node_type       = string
     fe_config       = optional(object({
-      is_leader_at_start = bool
-      ssl                = optional(object({
+      initial_leader = optional(object({
+        enabled       = bool
+        root_password = string
+        fe_follower_nodes = list(object({
+          ip   = string
+          fqdn = string
+        }))
+        be_nodes = list(object({
+          ip   = string
+          fqdn = string
+        }))
+      }), {
+        enabled           = false
+        root_password     = ""
+        fe_follower_nodes = []
+        be_nodes          = []
+      })
+      initial_follower = optional(object({
+        enabled        = bool
+        fe_leader_node = object({
+          ip   = string
+          fqdn = string
+        })
+      }), {
+        enabled        = false
+        fe_leader_node = null
+      })
+      ssl = optional(object({
         enabled           = bool
-        keystore_base64   = string
+        cert              = string
+        key               = string
         keystore_password = string
         key_password      = string
       }), {
         enabled           = false
-        keystore_base64   = ""
+        cert              = ""
+        key               = ""
         keystore_password = ""
         key_password      = ""
       })
-      root_password = string
     }), {
-      is_leader_at_start = false
-      ssl                = {
-        enabled           = false
-        keystore_base64   = ""
-        keystore_password = ""
-        key_password      = ""
-      }
-      root_password = ""
-    })
-    network_info = object({
-      fe_leader_node = object({
-        ip   = string
-        fqdn = string
-      })
-      fe_follower_nodes = list(object({
-        ip   = string
-        fqdn = string
-      }))
-      be_nodes = list(object({
-        ip   = string
-        fqdn = string
-      }))
+      initial_leader   = null
+      initial_follower = null
+      ssl              = null
     })
   })
 
   validation {
     condition     = contains(["fe", "be"], var.starrocks.node_type)
     error_message = "starrocks.node_type must be 'fe' or 'be'."
+  }
+
+  validation {
+    condition = (
+      var.starrocks.node_type == "be" ||
+      (
+        var.starrocks.node_type == "fe" &&
+        var.starrocks.fe_config != null &&
+        (
+          (try(var.starrocks.fe_config.initial_leader.enabled, false) && !try(var.starrocks.fe_config.initial_follower.enabled, false)) ||
+          (!try(var.starrocks.fe_config.initial_leader.enabled, false) && try(var.starrocks.fe_config.initial_follower.enabled, false))
+        )
+      )
+    )
+    error_message = "When starrocks.node_type is 'fe', starrocks.fe_config must be provided with either initial_leader.enabled or initial_follower.enabled set to true."
   }
 }
