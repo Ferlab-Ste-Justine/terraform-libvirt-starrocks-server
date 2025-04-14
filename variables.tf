@@ -257,14 +257,20 @@ variable "starrocks" {
     fe_config       = optional(object({
       initial_leader = optional(object({
         enabled           = bool
-        root_password     = string
         fe_follower_fqdns = list(string)
         be_fqdns          = list(string)
+        root_password     = string
+        users             = optional(list(object({
+          name         = string
+          password     = string
+          default_role = optional(string, "public")
+        })), []),
       }), {
         enabled           = false
-        root_password     = ""
         fe_follower_fqdns = []
         be_fqdns          = []
+        root_password     = ""
+        users             = []
       })
       initial_follower = optional(object({
         enabled        = bool
