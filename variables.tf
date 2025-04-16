@@ -284,13 +284,11 @@ variable "starrocks" {
         cert              = string
         key               = string
         keystore_password = string
-        key_password      = string
       }), {
         enabled           = false
         cert              = ""
         key               = ""
         keystore_password = ""
-        key_password      = ""
       })
     }), {
       initial_leader   = null
