@@ -293,10 +293,18 @@ variable "starrocks" {
         key               = ""
         keystore_password = ""
       })
+      iceberg_rest = optional(object({
+        ca_cert  = string
+        env_name = string
+      }), {
+        ca_cert  = ""
+        env_name = ""
+      })
     }), {
       initial_leader   = null
       initial_follower = null
       ssl              = null
+      iceberg_rest     = null
     })
   })
 
