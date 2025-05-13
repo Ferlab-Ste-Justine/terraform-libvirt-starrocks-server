@@ -126,6 +126,7 @@ variable "fluentbit" {
     enabled = bool
     starrocks_tag = string
     node_exporter_tag = string
+    starrocks_node_log_tag = string
     metrics = optional(object({
       enabled = bool
       port    = number
@@ -145,6 +146,7 @@ variable "fluentbit" {
     enabled = false
     starrocks_tag = ""
     node_exporter_tag = ""
+    starrocks_node_log_tag = ""
     metrics = {
       enabled = false
       port = 0
