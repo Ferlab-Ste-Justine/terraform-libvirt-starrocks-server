@@ -124,9 +124,9 @@ variable "fluentbit" {
   sensitive = true
   type = object({
     enabled = bool
-    starrocks_systemd_service_tag = string
-    node_exporter_systemd_service_tag = string
-    starrocks_log_file_tag = string
+    starrocks_tag = string
+    node_exporter_tag = string
+    log_files_read_from_head = optional(bool, true),
     metrics = optional(object({
       enabled = bool
       port    = number
@@ -144,9 +144,9 @@ variable "fluentbit" {
   })
   default = {
     enabled = false
-    starrocks_systemd_service_tag = ""
-    node_exporter_systemd_service_tag = ""
-    starrocks_log_file_tag = ""
+    starrocks_tag = ""
+    node_exporter_tag = ""
+    log_files_read_from_head = true
     metrics = {
       enabled = false
       port = 0

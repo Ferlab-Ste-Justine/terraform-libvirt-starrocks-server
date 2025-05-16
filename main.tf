@@ -130,20 +130,17 @@ module "fluentbit_configs" {
     metrics = var.fluentbit.metrics
     systemd_services = [
       {
-        tag     = var.fluentbit.starrocks_systemd_service_tag
-        service = "starrocks.service"
-      },
-      {
-        tag = var.fluentbit.node_exporter_systemd_service_tag
+        tag = var.fluentbit.node_exporter_tag
         service = "node-exporter.service"
       }
     ]
     log_files = [
       {
-        tag  = var.fluentbit.starrocks_log_file_tag
+        tag  = var.fluentbit.starrocks_tag
         path = var.starrocks.node_type == "fe" ? "/opt/starrocks/fe/log/fe.log" : "/opt/starrocks/${var.starrocks.node_type}/log/${var.starrocks.node_type}.INFO"
       }
     ]
+    log_files_read_from_head = var.fluentbit.log_files_read_from_head
     forward = var.fluentbit.forward
   }
   dynamic_config = {
