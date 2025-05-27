@@ -55,6 +55,7 @@ The module takes the following variables as input:
 - **fluentbit**: Optional fluent-bit configuration to securely route logs to a fluentd/fluent-bit node using the forward plugin. Alternatively, configuration can be 100% dynamic by specifying the parameters of an etcd store to fetch the configuration from. It has the following keys:
   - **enabled**: If set to false (the default), fluent-bit will not be installed.
   - **starrocks_tag** Tag to assign to logs coming from StarRocks log file (`fe.log` for a FE node, otherwise *`node_type`*`.INFO`)
+  - **starrocks_read_from_head** If set to true (the default), StarRocks log file will be read from its head instead of tail, when the file is being discovered for the first time
   - **node_exporter_tag** Tag to assign to logs coming from Prometheus Node Exporter systemd service
   - **metrics**: Configuration for metrics fluentbit exposes. It has the following keys:
     - **enabled**: Whether to enable the metrics or not
