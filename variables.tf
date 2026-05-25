@@ -302,12 +302,15 @@ variable "starrocks" {
         ca_cert  = ""
         env_name = ""
       })
+      meta_dir = optional(string, "/opt/starrocks/meta")
     }), {
       initial_leader   = null
       initial_follower = null
       ssl              = null
       iceberg_rest     = null
+      meta_dir         = ""
     })
+    be_storage_root_path = optional(string, "/opt/starrocks/storage")
   })
 
   validation {
