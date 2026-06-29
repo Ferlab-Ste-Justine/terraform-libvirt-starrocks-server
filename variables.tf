@@ -5,7 +5,7 @@ variable "name" {
 
 variable "hostname" {
   description = "Value to assign to the hostname. If left to empty (default), 'name' variable will be used."
-  type        = object({
+  type = object({
     hostname = string
     is_fqdn  = string
   })
@@ -35,20 +35,20 @@ variable "volume_id" {
 variable "libvirt_networks" {
   description = "Parameters of libvirt network connections if libvirt networks are used"
   type = list(object({
-    network_name = optional(string, "")
-    network_id = optional(string, "")
+    network_name  = optional(string, "")
+    network_id    = optional(string, "")
     prefix_length = string
-    ip = string
-    mac = string
-    gateway = optional(string, "")
-    dns_servers = optional(list(string), [])
+    ip            = string
+    mac           = string
+    gateway       = optional(string, "")
+    dns_servers   = optional(list(string), [])
   }))
   default = []
 }
 
 variable "macvtap_interfaces" {
   description = "List of macvtap interfaces"
-  type        = list(object({
+  type = list(object({
     interface     = string
     prefix_length = string
     ip            = string
@@ -70,13 +70,13 @@ variable "cloud_init_volume_name" {
   default     = ""
 }
 
-variable "ssh_admin_user" { 
+variable "ssh_admin_user" {
   description = "Pre-existing ssh admin user of the image"
   type        = string
   default     = "ubuntu"
 }
 
-variable "admin_user_password" { 
+variable "admin_user_password" {
   description = "Optional password for admin user"
   type        = string
   sensitive   = true
@@ -90,7 +90,7 @@ variable "ssh_admin_public_key" {
 
 variable "chrony" {
   description = "Chrony configuration for ntp. If enabled, chrony is installed and configured, else the default image ntp settings are kept"
-  type        = object({
+  type = object({
     enabled = bool,
     //https://chrony.tuxfamily.org/doc/4.2/chrony.conf.html#server
     servers = list(object({
@@ -109,54 +109,54 @@ variable "chrony" {
     })
   })
   default = {
-    enabled  = false
-    servers  = []
-    pools    = []
+    enabled = false
+    servers = []
+    pools   = []
     makestep = {
-      threshold  = 0,
-      limit      = 0
+      threshold = 0,
+      limit     = 0
     }
   }
 }
 
 variable "fluentbit" {
   description = "Fluent-bit configuration"
-  sensitive = true
+  sensitive   = true
   type = object({
-    enabled = bool
-    starrocks_tag = string
+    enabled                  = bool
+    starrocks_tag            = string
     starrocks_read_from_head = optional(bool, true),
-    node_exporter_tag = string
+    node_exporter_tag        = string
     metrics = optional(object({
       enabled = bool
       port    = number
-    }), {
+      }), {
       enabled = false
-      port = 0
+      port    = 0
     })
     forward = object({
-      domain = string
-      port = number
-      hostname = string
+      domain     = string
+      port       = number
+      hostname   = string
       shared_key = string
-      ca_cert = string
+      ca_cert    = string
     })
   })
   default = {
-    enabled = false
-    starrocks_tag = ""
+    enabled                  = false
+    starrocks_tag            = ""
     starrocks_read_from_head = true
-    node_exporter_tag = ""
+    node_exporter_tag        = ""
     metrics = {
       enabled = false
-      port = 0
+      port    = 0
     }
     forward = {
-      domain = ""
-      port = 0
-      hostname = ""
+      domain     = ""
+      port       = 0
+      hostname   = ""
       shared_key = ""
-      ca_cert = ""
+      ca_cert    = ""
     }
   }
 }
@@ -166,43 +166,43 @@ variable "fluentbit_dynamic_config" {
   type = object({
     enabled = bool
     source  = string
-    etcd    = optional(object({
+    etcd = optional(object({
       key_prefix     = string
       endpoints      = list(string)
       ca_certificate = string
-      client         = object({
+      client = object({
         certificate = string
         key         = string
         username    = string
         password    = string
       })
-    }), {
+      }), {
       key_prefix     = ""
       endpoints      = []
       ca_certificate = ""
-      client         = {
+      client = {
         certificate = ""
         key         = ""
         username    = ""
         password    = ""
       }
     })
-    git     = optional(object({
+    git = optional(object({
       repo             = string
       ref              = string
       path             = string
       trusted_gpg_keys = list(string)
-      auth             = object({
+      auth = object({
         client_ssh_key         = string
         client_ssh_user        = string
         server_ssh_fingerprint = string
       })
-    }), {
+      }), {
       repo             = ""
       ref              = ""
       path             = ""
       trusted_gpg_keys = []
-      auth             = {
+      auth = {
         client_ssh_key         = ""
         client_ssh_user        = ""
         server_ssh_fingerprint = ""
@@ -211,24 +211,24 @@ variable "fluentbit_dynamic_config" {
   })
   default = {
     enabled = false
-    source = "etcd"
+    source  = "etcd"
     etcd = {
       key_prefix     = ""
       endpoints      = []
       ca_certificate = ""
-      client         = {
+      client = {
         certificate = ""
         key         = ""
         username    = ""
         password    = ""
       }
     }
-    git  = {
+    git = {
       repo             = ""
       ref              = ""
       path             = ""
       trusted_gpg_keys = []
-      auth             = {
+      auth = {
         client_ssh_key         = ""
         client_ssh_user        = ""
         server_ssh_fingerprint = ""
@@ -256,21 +256,21 @@ variable "timezone" {
 
 variable "starrocks" {
   description = "Configuration for the starrocks server"
-  type        = object({
+  type = object({
     release_version = optional(string, "3.4.1"),
     node_type       = string
-    fe_config       = optional(object({
+    fe_config = optional(object({
       initial_leader = optional(object({
         enabled           = bool
         fe_follower_fqdns = list(string)
         be_fqdns          = list(string)
         root_password     = string
-        users             = optional(list(object({
+        users = optional(list(object({
           name         = string
           password     = string
           default_role = optional(string, "public")
         })), []),
-      }), {
+        }), {
         enabled           = false
         fe_follower_fqdns = []
         be_fqdns          = []
@@ -280,7 +280,7 @@ variable "starrocks" {
       initial_follower = optional(object({
         enabled        = bool
         fe_leader_fqdn = string
-      }), {
+        }), {
         enabled        = false
         fe_leader_fqdn = ""
       })
@@ -289,7 +289,7 @@ variable "starrocks" {
         cert              = string
         key               = string
         keystore_password = string
-      }), {
+        }), {
         enabled           = false
         cert              = ""
         key               = ""
@@ -298,12 +298,12 @@ variable "starrocks" {
       iceberg_rest = optional(object({
         ca_cert  = string
         env_name = string
-      }), {
+        }), {
         ca_cert  = ""
         env_name = ""
       })
       meta_dir = optional(string, "/opt/starrocks/meta")
-    }), {
+      }), {
       initial_leader   = null
       initial_follower = null
       ssl              = null
@@ -335,7 +335,7 @@ variable "starrocks" {
 }
 
 variable "data_volume" {
-  description = "Optional dedicated data volume for the StarRocks data directory. When enabled it is attached as a second disk (/dev/vdb) and mounted (optionally LUKS-encrypted) by cloud-init. Set starrocks.fe_config.meta_dir / starrocks.be_storage_root_path inside mount_path so the data survives reprovisioning the OS disk volume."
+  description = "Optional dedicated data volume attached as a second disk (/dev/vdb), optionally LUKS-encrypted and mounted by cloud-init. Point meta_dir / be_storage_root_path inside mount_path so data survives OS-disk reprovisioning."
   type = object({
     enabled    = bool
     volume_id  = string

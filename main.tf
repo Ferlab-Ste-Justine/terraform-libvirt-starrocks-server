@@ -1,55 +1,55 @@
 locals {
   fluentbit_updater_etcd = var.fluentbit.enabled && var.fluentbit_dynamic_config.enabled && var.fluentbit_dynamic_config.source == "etcd"
-  fluentbit_updater_git = var.fluentbit.enabled && var.fluentbit_dynamic_config.enabled && var.fluentbit_dynamic_config.source == "git"
+  fluentbit_updater_git  = var.fluentbit.enabled && var.fluentbit_dynamic_config.enabled && var.fluentbit_dynamic_config.source == "git"
   cloud_init_volume_name = var.cloud_init_volume_name == "" ? "${var.name}-cloud-init.iso" : var.cloud_init_volume_name
   network_interfaces = concat(
-    [for libvirt_network in var.libvirt_networks: {
+    [for libvirt_network in var.libvirt_networks : {
       network_name = libvirt_network.network_name != "" ? libvirt_network.network_name : null
-      network_id = libvirt_network.network_id != "" ? libvirt_network.network_id : null
-      macvtap = null
-      addresses = null
-      mac = libvirt_network.mac
-      hostname = null
+      network_id   = libvirt_network.network_id != "" ? libvirt_network.network_id : null
+      macvtap      = null
+      addresses    = null
+      mac          = libvirt_network.mac
+      hostname     = null
     }],
-    [for macvtap_interface in var.macvtap_interfaces: {
+    [for macvtap_interface in var.macvtap_interfaces : {
       network_name = null
-      network_id = null
-      macvtap = macvtap_interface.interface
-      addresses = null
-      mac = macvtap_interface.mac
-      hostname = null
+      network_id   = null
+      macvtap      = macvtap_interface.interface
+      addresses    = null
+      mac          = macvtap_interface.mac
+      hostname     = null
     }]
   )
   hostname = var.hostname.hostname != "" ? var.hostname.hostname : var.name
 }
 
 module "network_configs" {
-  source             = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//network?ref=v0.50.3"
+  source = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//network?ref=v0.50.3"
   network_interfaces = concat(
-    [for idx, libvirt_network in var.libvirt_networks: {
-      ip = libvirt_network.ip
-      gateway = libvirt_network.gateway
+    [for idx, libvirt_network in var.libvirt_networks : {
+      ip            = libvirt_network.ip
+      gateway       = libvirt_network.gateway
       prefix_length = libvirt_network.prefix_length
-      interface = "libvirt${idx}"
-      mac = libvirt_network.mac
-      dns_servers = libvirt_network.dns_servers
+      interface     = "libvirt${idx}"
+      mac           = libvirt_network.mac
+      dns_servers   = libvirt_network.dns_servers
     }],
-    [for idx, macvtap_interface in var.macvtap_interfaces: {
-      ip = macvtap_interface.ip
-      gateway = macvtap_interface.gateway
+    [for idx, macvtap_interface in var.macvtap_interfaces : {
+      ip            = macvtap_interface.ip
+      gateway       = macvtap_interface.gateway
       prefix_length = macvtap_interface.prefix_length
-      interface = "macvtap${idx}"
-      mac = macvtap_interface.mac
-      dns_servers = macvtap_interface.dns_servers
+      interface     = "macvtap${idx}"
+      mac           = macvtap_interface.mac
+      dns_servers   = macvtap_interface.dns_servers
     }]
   )
 }
 
 module "starrocks_configs" {
-  source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//starrocks?ref=v0.50.3"
+  source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//starrocks?ref=v0.52.0"
   install_dependencies = var.install_dependencies
   timezone             = var.timezone
-  hosts_file_patch     = {
+  hosts_file_patch = {
     enabled = false
     fqdn    = ""
   }
@@ -73,7 +73,7 @@ module "prometheus_node_exporter_configs" {
 module "chrony_configs" {
   source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//chrony?ref=v0.50.3"
   install_dependencies = var.install_dependencies
-  chrony               = {
+  chrony = {
     servers  = var.chrony.servers
     pools    = var.chrony.pools
     makestep = var.chrony.makestep
@@ -81,26 +81,26 @@ module "chrony_configs" {
 }
 
 module "fluentbit_updater_etcd_configs" {
-  source = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//configurations-auto-updater?ref=v0.50.3"
+  source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//configurations-auto-updater?ref=v0.50.3"
   install_dependencies = var.install_dependencies
   filesystem = {
-    path = "/etc/fluent-bit-customization/dynamic-config"
-    files_permission = "700"
+    path                   = "/etc/fluent-bit-customization/dynamic-config"
+    files_permission       = "700"
     directories_permission = "700"
   }
   etcd = {
-    key_prefix = var.fluentbit_dynamic_config.etcd.key_prefix
-    endpoints = var.fluentbit_dynamic_config.etcd.endpoints
+    key_prefix         = var.fluentbit_dynamic_config.etcd.key_prefix
+    endpoints          = var.fluentbit_dynamic_config.etcd.endpoints
     connection_timeout = "60s"
-    request_timeout = "60s"
-    retry_interval = "4s"
-    retries = 15
+    request_timeout    = "60s"
+    retry_interval     = "4s"
+    retries            = 15
     auth = {
-      ca_certificate = var.fluentbit_dynamic_config.etcd.ca_certificate
+      ca_certificate     = var.fluentbit_dynamic_config.etcd.ca_certificate
       client_certificate = var.fluentbit_dynamic_config.etcd.client.certificate
-      client_key = var.fluentbit_dynamic_config.etcd.client.key
-      username = var.fluentbit_dynamic_config.etcd.client.username
-      password = var.fluentbit_dynamic_config.etcd.client.password
+      client_key         = var.fluentbit_dynamic_config.etcd.client.key
+      username           = var.fluentbit_dynamic_config.etcd.client.username
+      password           = var.fluentbit_dynamic_config.etcd.client.password
     }
   }
   notification_command = {
@@ -108,18 +108,18 @@ module "fluentbit_updater_etcd_configs" {
     retries = 30
   }
   naming = {
-    binary = "fluent-bit-config-updater"
+    binary  = "fluent-bit-config-updater"
     service = "fluent-bit-config-updater"
   }
   user = "fluentbit"
 }
 
 module "fluentbit_updater_git_configs" {
-  source = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//gitsync?ref=v0.50.3"
+  source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//gitsync?ref=v0.50.3"
   install_dependencies = var.install_dependencies
   filesystem = {
-    path = "/etc/fluent-bit-customization/dynamic-config"
-    files_permission = "700"
+    path                   = "/etc/fluent-bit-customization/dynamic-config"
+    files_permission       = "700"
     directories_permission = "700"
   }
   git = var.fluentbit_dynamic_config.git
@@ -128,20 +128,20 @@ module "fluentbit_updater_git_configs" {
     retries = 30
   }
   naming = {
-    binary = "fluent-bit-config-updater"
+    binary  = "fluent-bit-config-updater"
     service = "fluent-bit-config-updater"
   }
   user = "fluentbit"
 }
 
 module "fluentbit_configs" {
-  source = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//fluent-bit?ref=v0.50.3"
+  source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//fluent-bit?ref=v0.50.3"
   install_dependencies = var.install_dependencies
   fluentbit = {
     metrics = var.fluentbit.metrics
     systemd_services = [
       {
-        tag = var.fluentbit.node_exporter_tag
+        tag     = var.fluentbit.node_exporter_tag
         service = "node-exporter.service"
       }
     ]
@@ -155,37 +155,37 @@ module "fluentbit_configs" {
     forward = var.fluentbit.forward
   }
   dynamic_config = {
-    enabled = var.fluentbit_dynamic_config.enabled
+    enabled         = var.fluentbit_dynamic_config.enabled
     entrypoint_path = "/etc/fluent-bit-customization/dynamic-config/index.conf"
   }
 }
 
 locals {
   cloudinit_templates = concat([
-      {
-        filename     = "base.cfg"
-        content_type = "text/cloud-config"
-        content      = templatefile(
-          "${path.module}/files/user_data.yaml.tpl", 
-          {
-            hostname             = local.hostname
-            is_fqdn              = var.hostname.is_fqdn
-            ssh_admin_public_key = var.ssh_admin_public_key
-            ssh_admin_user       = var.ssh_admin_user
-            admin_user_password  = var.admin_user_password
-          }
-        )
-      },
-      {
-        filename     = "starrocks.cfg"
-        content_type = "text/cloud-config"
-        content      = module.starrocks_configs.configuration
-      },
-      {
-        filename     = "node_exporter.cfg"
-        content_type = "text/cloud-config"
-        content      = module.prometheus_node_exporter_configs.configuration
-      }
+    {
+      filename     = "base.cfg"
+      content_type = "text/cloud-config"
+      content = templatefile(
+        "${path.module}/files/user_data.yaml.tpl",
+        {
+          hostname             = local.hostname
+          is_fqdn              = var.hostname.is_fqdn
+          ssh_admin_public_key = var.ssh_admin_public_key
+          ssh_admin_user       = var.ssh_admin_user
+          admin_user_password  = var.admin_user_password
+        }
+      )
+    },
+    {
+      filename     = "starrocks.cfg"
+      content_type = "text/cloud-config"
+      content      = module.starrocks_configs.configuration
+    },
+    {
+      filename     = "node_exporter.cfg"
+      content_type = "text/cloud-config"
+      content      = module.prometheus_node_exporter_configs.configuration
+    }
     ],
     var.chrony.enabled ? [{
       filename     = "chrony.cfg"
