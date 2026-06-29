@@ -57,6 +57,12 @@ module "starrocks_configs" {
   node_type            = var.starrocks.node_type
   fe_config            = var.starrocks.fe_config
   be_storage_root_path = var.starrocks.be_storage_root_path
+  data_volume = {
+    enabled    = var.data_volume.enabled
+    device     = "/dev/vdb"
+    mount_path = var.data_volume.mount_path
+    luks       = var.data_volume.luks
+  }
 }
 
 module "prometheus_node_exporter_configs" {
@@ -236,6 +242,13 @@ resource "libvirt_domain" "starrocks_node" {
 
   disk {
     volume_id = var.volume_id
+  }
+
+  dynamic "disk" {
+    for_each = var.data_volume.enabled ? [1] : []
+    content {
+      volume_id = var.data_volume.volume_id
+    }
   }
 
   dynamic "network_interface" {

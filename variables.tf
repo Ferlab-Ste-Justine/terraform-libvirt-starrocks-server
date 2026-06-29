@@ -333,3 +333,22 @@ variable "starrocks" {
     error_message = "When starrocks.node_type is 'fe', starrocks.fe_config must be provided with either initial_leader.enabled or initial_follower.enabled set to true."
   }
 }
+
+variable "data_volume" {
+  description = "Optional dedicated data volume for the StarRocks data directory. When enabled it is attached as a second disk (/dev/vdb) and mounted (optionally LUKS-encrypted) by cloud-init. Set starrocks.fe_config.meta_dir / starrocks.be_storage_root_path inside mount_path so the data survives reprovisioning the OS disk volume."
+  type = object({
+    enabled    = bool
+    volume_id  = string
+    mount_path = string
+    luks = optional(object({
+      enabled    = bool
+      passphrase = string
+    }), { enabled = false, passphrase = "" })
+  })
+  default = {
+    enabled    = false
+    volume_id  = ""
+    mount_path = ""
+  }
+  sensitive = true
+}
