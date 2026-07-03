@@ -46,14 +46,16 @@ module "network_configs" {
 }
 
 module "starrocks_configs" {
-  source               = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//starrocks?ref=v0.50.3"
-  install_dependencies = var.install_dependencies
-  timezone             = var.timezone
-  hosts_file_patch     = {
+  source = "git::https://github.com/Ferlab-Ste-Justine/terraform-cloudinit-templates.git//starrocks?ref=v0.52.0"
+  dependencies = {
+    install           = var.install_dependencies
+    starrocks_tar_url = "https://releases.starrocks.io/starrocks/StarRocks-${var.starrocks.release_version}-ubuntu-amd64.tar.gz"
+  }
+  timezone = var.timezone
+  hosts_file_patch = {
     enabled = false
     fqdn    = ""
   }
-  release_version      = var.starrocks.release_version
   node_type            = var.starrocks.node_type
   fe_config            = var.starrocks.fe_config
   be_storage_root_path = var.starrocks.be_storage_root_path

@@ -257,15 +257,18 @@ variable "timezone" {
 variable "starrocks" {
   description = "Configuration for the starrocks server"
   type        = object({
-    release_version = optional(string, "3.4.1"),
+    release_version = optional(string, "3.5.18"),
     node_type       = string
     fe_config       = optional(object({
       initial_leader = optional(object({
         enabled           = bool
         fe_follower_fqdns = list(string)
         be_fqdns          = list(string)
-        root_password     = string
-        users             = optional(list(object({
+        root_password = object({
+          literal      = optional(string)
+          shell_source = optional(string)
+        })
+        users = optional(list(object({
           name         = string
           password     = string
           default_role = optional(string, "public")
@@ -274,7 +277,7 @@ variable "starrocks" {
         enabled           = false
         fe_follower_fqdns = []
         be_fqdns          = []
-        root_password     = ""
+        root_password     = { literal = "" }
         users             = []
       })
       initial_follower = optional(object({
