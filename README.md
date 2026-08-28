@@ -102,3 +102,7 @@ The module takes the following variables as input:
   - **node_type**: StarRocks node type to configure, either **fe** or **be**.
   - **fe_config**: StarRocks FE-related settings (**initial_leader** + **initial_follower** + **ssl** + **iceberg_rest** + **meta_dir** that defaults to **/opt/starrocks/meta**). Only needed if **node_type** is set to **fe**.
   - **be_storage_root_path**: Starrocks BE storage root path. Defaults to **/opt/starrocks/storage**.
+
+- **security_reverse_proxy**: Added a security reverse proxy currently limited to the starrocks metrics endpoint. Useful to collect metrics over tls (it will use the same tls cert/key as you pass to the starrocks frontend so you should define that argument even for backend nodes if you want to server metrics over tls). Note that you should add firewall rules if you want to otherwise restrict access to the 8030/8040 as this terraform module currently doesn't do this.
+  - **expose_metrics**: Boolean to indicate if you want to enable this proxy for the starrocks metrics endpoint.
+  - **port**: Port to expose the proxy on. Defaults to 10030

@@ -254,6 +254,18 @@ variable "timezone" {
   default     = "America/Montreal"
 }
 
+variable "security_reverse_proxy" {
+  description = "Security reverse proxy for select paths on 8030/8040 ports. Currently used only to expose metrics over tls without the other endpoints"
+  type        = object({
+    expose_metrics = bool
+    port           = optional(number, 10030)
+  })
+  default     = {
+    expose_metrics = false
+    port           = 10030
+  }
+}
+
 variable "starrocks" {
   description = "Configuration for the starrocks server"
   type        = object({
