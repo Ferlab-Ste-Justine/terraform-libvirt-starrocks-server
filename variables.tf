@@ -318,6 +318,12 @@ variable "starrocks" {
         env_name = ""
       })
       meta_dir = optional(string, "/opt/starrocks/meta")
+      ranger = optional(object({
+        host          = string
+        sync_username = string
+        sync_password = string
+        ca_cert       = optional(string, "")
+      }))
     }), {
       initial_leader   = null
       initial_follower = null
