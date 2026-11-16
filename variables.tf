@@ -324,12 +324,14 @@ variable "starrocks" {
         sync_password = string
         ca_cert       = optional(string, "")
       }))
+      additional_conf = optional(list(string), [])
     }), {
       initial_leader   = null
       initial_follower = null
       ssl              = null
       iceberg_rest     = null
       meta_dir         = ""
+      additional_conf  = []
     })
     be_storage_root_path = optional(string, "/opt/starrocks/storage")
   })
